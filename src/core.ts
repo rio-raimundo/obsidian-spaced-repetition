@@ -118,10 +118,13 @@ export class OsrCore {
 
         const tags = noteFile.getAllTagsFromCache();
 
+        // Return if no matched tags or any excluded tags
         const matchedNoteTags = SettingsUtil.filterForNoteReviewTag(this.settings, tags);
-        if (matchedNoteTags.length == 0) {
+        const excludedNoteTags = SettingsUtil.filterForNoteExcludeTag(this.settings, tags);
+        if (matchedNoteTags.length == 0 || excludedNoteTags.length > 0) {
             return;
         }
+
         const noteSchedule: RepItemScheduleInfo =
             await DataStoreAlgorithm.getInstance().noteGetSchedule(noteFile);
         this._noteReviewQueue.addNoteToQueue(noteFile, noteSchedule, matchedNoteTags);

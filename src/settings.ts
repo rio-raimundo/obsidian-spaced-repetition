@@ -27,6 +27,7 @@ export interface SRSettings {
     // notes
     enableNoteReviewPaneOnStartup: boolean;
     tagsToReview: string[];
+    tagsToExclude: string[];
     noteFoldersToIgnore: string[];
     openRandomNote: boolean;
     autoNextNote: boolean;
@@ -182,6 +183,16 @@ export class SettingsUtil {
         for (const tagToReview of settings.tagsToReview) {
             if (tags.some((tag) => tag === tagToReview || tag.startsWith(tagToReview + "/"))) {
                 result.push(tagToReview);
+            }
+        }
+        return result;
+    }
+
+    static filterForNoteExcludeTag(settings: SRSettings, tags: string[]): string[] {
+        const result: string[] = [];
+        for (const tagToExclude of settings.tagsToExclude) {
+            if (tags.some((tag) => tag === tagToExclude || tag.startsWith(tagToExclude + "/"))) {
+                result.push(tagToExclude);
             }
         }
         return result;

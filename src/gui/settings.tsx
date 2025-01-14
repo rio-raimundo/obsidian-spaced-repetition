@@ -480,6 +480,20 @@ export class SRSettingTab extends PluginSettingTab {
                         });
                     }),
             );
+        
+        new Setting(containerEl)
+        .setName(t("TAGS_TO_EXCLUDE"))
+        .setDesc(t("TAGS_TO_EXCLUDE_DESC"))
+        .addTextArea((text) =>
+            text
+                .setValue(this.plugin.data.settings.tagsToReview.join(" "))
+                .onChange((value) => {
+                    applySettingsUpdate(async () => {
+                        this.plugin.data.settings.tagsToReview = value.split(/\s+/);
+                        await this.plugin.savePluginData();
+                    });
+                }),
+        );
 
         this.createSettingFoldersToIgnore(containerEl);
 
