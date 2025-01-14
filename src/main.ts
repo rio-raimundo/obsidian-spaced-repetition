@@ -348,6 +348,33 @@ export default class SRPlugin extends Plugin {
         return new DeckTreeIterator(iteratorOrder, baseDeck);
     }
 
+        // Given a list of tags, return the subset that is in settings.tagsToReview
+    private static filterForNoteReviewTag(settings: SRSettings, reviewDecks: {[deckKey: string]: ReviewDeck}, tags: string[]): string[] {
+        const result: string[] = [];
+        for (const tagToReview of settings.tagsToReview) {
+            if (tags.some((tag) => tag === tagToReview || tag.startsWith(tagToReview + "/"))) {
+                if (!Object.prototype.hasOwnProperty.call(reviewDecks, tagToReview)) {
+                    reviewDecks[tagToReview] = new ReviewDeck(tagToReview);
+                }
+                result.push(tagToReview);
+            }
+        }
+        return result;
+    }
+
+    private static filterForNoteExcludeTag(settings: SRSettings, reviewDecks: {[deckKey: string]: ReviewDeck}, tags: string[]): string[] {
+        const result: string[] = [];
+        for (const tagToExclude of settings.tagsToExclude) {
+            if (tags.some((tag) => tag === tagToExclude || tag.startsWith(tagToExclude + "/"))) {
+                if (!Object.prototype.hasOwnProperty.call(reviewDecks, tagToExclude)) {
+                    reviewDecks[tagToExclude] = new ReviewDeck(tagToExclude);
+                }
+                result.push(tagToExclude);
+            }
+        }
+        return result;
+    }
+
     async sync(): Promise<void> {
         if (this.syncLock) {
             return;
@@ -423,20 +450,19 @@ export default class SRPlugin extends Plugin {
                 fileCachedData.frontmatter || {};
             const tags = getAllTags(fileCachedData) || [];
 
-            let shouldIgnore = true;
-            const matchedNoteTags = [];
-
-            for (const tagToReview of this.data.settings.tagsToReview) {
-                if (tags.some((tag) => tag === tagToReview || tag.startsWith(tagToReview + "/"))) {
-                    if (!Object.prototype.hasOwnProperty.call(this.reviewDecks, tagToReview)) {
-                        this.reviewDecks[tagToReview] = new ReviewDeck(tagToReview);
-                    }
-                    matchedNoteTags.push(tagToReview);
-                    shouldIgnore = false;
-                    break;
-                }
-            }
-            if (shouldIgnore) {
+            // check if a given note has any matched tags using custom function, or any tags which should be excluded
+            const matchedNoteTags = SRPlugin.filterForNoteReviewTag(
+                this.data.settings,
+                this.reviewDecks,
+                tags,
+            );
+            const excludedNoteTags = SRPlugin.filterForNoteExcludeTag(
+                this.data.settings,
+                this.reviewDecks,
+                tags,
+            );
+            // if length of matchedNoteTags is 0 OR length of excludedNoteTags is greater than 0, then we should ignore this note
+            if (matchedNoteTags.length === 0 || excludedNoteTags.length > 0) {
                 continue;
             }
 

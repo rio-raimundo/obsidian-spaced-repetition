@@ -28,6 +28,7 @@ export interface SRSettings {
     // notes
     enableNoteReviewPaneOnStartup: boolean;
     tagsToReview: string[];
+    tagsToExclude: string[];
     noteFoldersToIgnore: string[];
     openRandomNote: boolean;
     autoNextNote: boolean;
@@ -72,6 +73,7 @@ export const DEFAULT_SETTINGS: SRSettings = {
     // notes
     enableNoteReviewPaneOnStartup: true,
     tagsToReview: ["#review"],
+    tagsToExclude: ["#exclude"],
     noteFoldersToIgnore: [],
     openRandomNote: false,
     autoNextNote: false,
@@ -555,6 +557,20 @@ export class SRSettingTab extends PluginSettingTab {
                     }),
             );
 
+        new Setting(containerEl)
+        .setName(t("TAGS_TO_EXCLUDE"))
+        .setDesc(t("TAGS_TO_EXCLUDE_DESC"))
+        .addTextArea((text) =>
+            text
+                .setValue(this.plugin.data.settings.tagsToExclude.join(" "))
+                .onChange((value) => {
+                    applySettingsUpdate(async () => {
+                        this.plugin.data.settings.tagsToExclude = value.split(/\s+/);
+                        await this.plugin.savePluginData();
+                    });
+                }),
+        );
+    
         new Setting(containerEl)
             .setName(t("OPEN_RANDOM_NOTE"))
             .setDesc(t("OPEN_RANDOM_NOTE_DESC"))
