@@ -366,9 +366,6 @@ export default class SRPlugin extends Plugin {
         const result: string[] = [];
         for (const tagToExclude of settings.tagsToExclude) {
             if (tags.some((tag) => tag === tagToExclude || tag.startsWith(tagToExclude + "/"))) {
-                if (!Object.prototype.hasOwnProperty.call(reviewDecks, tagToExclude)) {
-                    reviewDecks[tagToExclude] = new ReviewDeck(tagToExclude);
-                }
                 result.push(tagToExclude);
             }
         }
@@ -461,6 +458,7 @@ export default class SRPlugin extends Plugin {
                 this.reviewDecks,
                 tags,
             );
+            console.log("excludedNoteTags", excludedNoteTags);
             // if length of matchedNoteTags is 0 OR length of excludedNoteTags is greater than 0, then we should ignore this note
             if (matchedNoteTags.length === 0 || excludedNoteTags.length > 0) {
                 continue;
