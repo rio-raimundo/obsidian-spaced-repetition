@@ -486,10 +486,10 @@ export class SRSettingTab extends PluginSettingTab {
         .setDesc(t("TAGS_TO_EXCLUDE_DESC"))
         .addTextArea((text) =>
             text
-                .setValue(this.plugin.data.settings.tagsToReview.join(" "))
+                .setValue(this.plugin.data.settings.tagsToExclude.join(" "))
                 .onChange((value) => {
                     applySettingsUpdate(async () => {
-                        this.plugin.data.settings.tagsToReview = value.split(/\s+/);
+                        this.plugin.data.settings.tagsToExclude = value.split(/\s+/);
                         await this.plugin.savePluginData();
                     });
                 }),
